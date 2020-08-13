@@ -8,6 +8,26 @@ board = [[0, 0, 0, 2, 6, 0, 7, 0, 1],
     [0, 4, 0, 0, 5, 0, 0, 3, 6],
     [7, 0, 3, 0, 1, 8, 0, 0, 0]]
 
+board1= [[0, 2, 0, 6, 0, 8, 0, 0, 0],
+    [5, 8, 0, 0, 0, 9, 7, 0, 0],
+    [0, 0, 0, 0, 4, 0, 0, 0, 0],
+    [3, 7, 0, 0, 0, 0, 5, 0, 0],
+    [6, 0, 0, 0, 0, 0, 0, 0, 4],
+    [0, 0, 8, 0, 0, 0, 0, 1, 3],
+    [0, 0, 0, 0, 2, 0, 0, 0, 0],
+    [0, 0, 9, 8, 0, 0, 0, 3, 6],
+    [0, 0, 0, 3, 0, 6, 0, 9, 0]]
+
+board2= [[0, 2, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 6, 0, 0, 0, 0, 3],
+    [0, 7, 4, 0, 8, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 3, 0, 0, 2],
+    [0, 8, 0, 0, 4, 0, 0, 1, 0],
+    [6, 0, 0, 5, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 7, 8, 0],
+    [5, 0, 0, 0, 0, 9, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 4, 0]]
+
 def show(bo):
     for i in range(len(bo)):
         if i % 3 == 0 and i != 0:
@@ -30,7 +50,7 @@ def find_empty(bo): #takes board and current row
             if bo[i][j] == 0:
                 return (i, j)
 
-    return False
+    return (-1, -1) #simplifies stuff in solve()
 
 #could also return first/ all cell that conflict occurs with
 def valid(bo, row, col, val):
@@ -43,8 +63,6 @@ def valid(bo, row, col, val):
             if (i, j) != (row, col) and bo[i][j] == val:
                 return False
     
-    #for i in list(range(xbox * 3) + range(xbox * 3 + 4, len(bo))): # might allow me to cut down 6 calculations evey iteration but severely affects readability
-    
     #checks row and col to see if val already exists
     for i in range(len(bo)):
         if i != row and bo[i][col] == val:
@@ -55,22 +73,29 @@ def valid(bo, row, col, val):
     #if no matches are found
     return True 
 
-
+temp = 0
 def solve(bo):
-    show(board)
-    loc = find_empty(bo) #finds location of next empty cell
-    if loc: 
-        row, col = loc
+    global temp
+    temp += 1
+    show(bo)
+    row, col = find_empty(bo) #finds location of next empty cell
+    if row > - 1:
         print(row, col)
+
         # start solving.
         for n in range(1, len(bo) + 1): 
             if valid(bo, row, col, n):
                 bo[row][col] = n
                 solve(bo)
+
+            if find_empty(bo)[0] == -1 :
+                return 
+
         bo[row][col] = 0
         return 
     else:
         return
+    
 
 
 
@@ -79,8 +104,8 @@ def solve(bo):
 
 
 
-#show(board)
-solve(board)
-#print(valid(board, 0, 0, 3))
-#show(board)
-#print('puzzle solved!')
+
+#show(board1)
+solve(board1)
+print(temp)
+temp = 0
