@@ -79,13 +79,11 @@ temp = 0
 
 def solve(bo, row=0):  # vuild whole funnciton here but set a default value for iniital cordinates to ocntinue from when finding empty vars
     global temp
-    temp += 1
-    show(bo)
     for i in range(row, len(bo)):
         for j in range(len(bo)):
             if bo[i][j] == 0:
-                print(i, j)
                 for x in range(1, len(bo) + 1):
+                    temp += 1
                     if valid(bo, i, j, x):
                         bo[i][j] = x
                         if solve(bo, i):  # checks if updated board and row is solvable
@@ -94,14 +92,21 @@ def solve(bo, row=0):  # vuild whole funnciton here but set a default value for 
                 # reset value if dead end - could also put in if cond. but doesnt matter because new x wont conflict w previous
                 bo[i][j] = 0
                 return False
-
+    show(bo)
+    print(
+        f"Process took {temp} steps and finished in {time.time() - start_time} seconds")
+    global more
+    more = input('look for more? (Y for yes):')
+    if more.lower() == 'y':
+        print('searching ...')
+        return False
     return True  # if no empty cells found
     # input('more?')  # can be used if there is more than one solution
 
 
 # show(board1)
 start_time = time.time()
-solve(board1)
-print(
-    f"Process took {temp} steps and finished in {time.time() - start_time} seconds")
-temp = 0
+show(board2)
+solve(board2)
+if(more.lower() == 'y'):
+    print('no more possible solutions')
