@@ -30,6 +30,8 @@ board2 = [[0, 2, 0, 0, 0, 0, 0, 0, 0],
           [5, 0, 0, 0, 0, 9, 0, 0, 0],
           [0, 0, 0, 0, 0, 0, 0, 4, 0]]
 
+# generates a sudoku puzzle
+
 
 def gen_board():
     pass
@@ -93,8 +95,7 @@ def solve(bo, row=0):  # vuild whole funnciton here but set a default value for 
                 bo[i][j] = 0
                 return False
     show(bo)
-    print(
-        f"Process took {temp} steps and finished in {time.time() - start_time} seconds")
+   # print(f"Process took {temp} steps and finished in {time.time() - start_time} seconds")
     global more
     more = input('look for more? (Y for yes):')
     if more.lower() == 'y':
@@ -104,9 +105,9 @@ def solve(bo, row=0):  # vuild whole funnciton here but set a default value for 
     # input('more?')  # can be used if there is more than one solution
 
 
-# show(board1)
+"""# show(board1)
 start_time = time.time()
 show(board2)
 solve(board2)
 if(more.lower() == 'y'):
-    print('no more possible solutions')
+    print('no more possible solutions')"""
