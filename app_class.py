@@ -11,10 +11,13 @@ class App:
         self.window = pygame.display.set_mode(
             (WIDTH, HEIGHT))  # creates display window
         self.running = True  # checks whether game is running
-        self.grid = board
+        self.grid = finishedBoard
         self.selected = None  # when something selected
         self.mousePos = None  # mouse pos
         self.state = "playing"  # determines state of board
+        self.cellChanged = False
+        self.finished = False
+        self.incorrectCells = []
         self.playingButtons = []  # stores buttons for the play state
         self.menuButtons = []
         self.endButtons = []
@@ -55,12 +58,21 @@ class App:
                     if self.isInt(event.unicode):
                         self.grid[self.selected[0]][self.selected[1]] = int(
                             event.unicode)
+                        self.cellChanged = True
 
     # updates thigns every frame for play state
     def playing_update(self):
         self.mousePos = pygame.mouse.get_pos()
         for button in self.playingButtons:
             button.update(self.mousePos)
+
+        if self.cellChanged:
+            self.incorrectCells = []
+            if self.allCellsDone():
+                self.finished = True
+                self.checkAllCells()
+                if not self.incorrectCells:
+                    print('Congratulations')
 
     # draws board in play state
     def playing_draw(self):
@@ -74,17 +86,40 @@ class App:
             self.drawSelection(self.window, self.selected)
 
         self.shadeLockedCells(self.window, self.lockedCells)
+        self.shadeIncorrectCells(self.window, self.lockedCells)
 
         self.drawNumbers(self.window)
 
         self.drawGrid(self.window)
         pygame.display.update()
 
+        self.cellChanged = False
+
+##### CHECK FUNCTIONS #####
+    def allCellsDone(self):
+        for row in self.grid:
+            for num in row:
+                if not num:
+                    return False
+        return True
+
+    def checkAllCells(self):
+        for ridx, row in enumerate(self.grid):
+            for cidx, num in enumerate(row):
+                if [ridx, cidx] not in self.lockedCells and [ridx, cidx] not in self.incorrectCells:
+                    if not valid(self.grid, ridx, cidx, num):
+                        self.incorrectCells.append([ridx, cidx])
+
 ##### HELPER FUNCTIONS #####
 
     def drawSelection(self, window, pos):
         pygame.draw.rect(
             window, LIGHTBLUE, (pos[1]*cellSize + gridPos[0], pos[0] * cellSize + gridPos[1], cellSize, cellSize))
+
+    def shadeIncorrectCells(self, window, locked):
+        for cell in self.incorrectCells:
+            pygame.draw.rect(window, INCORRECTCELLCOLOUR, (
+                cell[1]*cellSize + gridPos[0], cell[0]*cellSize + gridPos[1], cellSize, cellSize))
 
     def shadeLockedCells(self, window, locked):
         for cell in locked:
@@ -116,7 +151,7 @@ class App:
         if self.mousePos[0] < gridPos[0] or self.mousePos[1] < gridPos[1] or self.mousePos[0] > gridPos[0] + gridSize or self.mousePos[1] > gridPos[1] + gridSize:
             return False
         # else returns selected box
-        return (self.mousePos[1] - gridPos[1])//cellSize, (self.mousePos[0]-gridPos[0])//cellSize
+        return [(self.mousePos[1] - gridPos[1])//cellSize, (self.mousePos[0]-gridPos[0])//cellSize]
 
     # creates all buttons
     def loadButtons(self):
