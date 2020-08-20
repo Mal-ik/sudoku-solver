@@ -1,45 +1,9 @@
+import pygame
+from sys import exit
 import time
 
-board = [[0, 0, 0, 2, 6, 0, 7, 0, 1],
-         [6, 8, 0, 0, 7, 0, 0, 9, 0],
-         [1, 9, 0, 0, 0, 4, 5, 0, 0],
-         [8, 2, 0, 1, 0, 0, 0, 4, 0],
-         [0, 0, 4, 6, 0, 2, 9, 0, 0],
-         [0, 5, 0, 0, 0, 3, 0, 2, 8],
-         [0, 0, 9, 3, 0, 0, 0, 7, 4],
-         [0, 4, 0, 0, 5, 0, 0, 3, 6],
-         [7, 0, 3, 0, 1, 8, 0, 0, 0]]
-
-board1 = [[0, 2, 0, 6, 0, 8, 0, 0, 0],
-          [5, 8, 0, 0, 0, 9, 7, 0, 0],
-          [0, 0, 0, 0, 4, 0, 0, 0, 0],
-          [3, 7, 0, 0, 0, 0, 5, 0, 0],
-          [6, 0, 0, 0, 0, 0, 0, 0, 4],
-          [0, 0, 8, 0, 0, 0, 0, 1, 3],
-          [0, 0, 0, 0, 2, 0, 0, 0, 0],
-          [0, 0, 9, 8, 0, 0, 0, 3, 6],
-          [0, 0, 0, 3, 0, 6, 0, 9, 0]]
-
-board2 = [[0, 2, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 6, 0, 0, 0, 0, 3],
-          [0, 7, 4, 0, 8, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 3, 0, 0, 2],
-          [0, 8, 0, 0, 4, 0, 0, 1, 0],
-          [6, 0, 0, 5, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 1, 0, 7, 8, 0],
-          [5, 0, 0, 0, 0, 9, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 4, 0]]
-
-finishedBoard = [[0, 3, 4, 6, 7, 8, 9, 1, 2],
-                 [6, 7, 2, 1, 9, 5, 3, 4, 8],
-                 [1, 9, 8, 3, 4, 2, 5, 6, 7],
-                 [8, 5, 9, 7, 6, 1, 4, 2, 3],
-                 [4, 2, 6, 8, 5, 3, 7, 9, 1],
-                 [7, 1, 3, 9, 2, 4, 8, 5, 6],
-                 [9, 6, 1, 5, 3, 7, 2, 8, 4],
-                 [2, 8, 7, 4, 1, 9, 6, 3, 5],
-                 [3, 4, 5, 2, 8, 6, 1, 7, 9]]
-# generates a sudoku puzzle
+# Set to False to drastically increase solve speed
+visuals = True
 
 
 def gen_board():
@@ -89,35 +53,47 @@ def valid(bo, row, col, val):
 temp = 0
 
 
-def solve(bo, row=0):  # vuild whole funnciton here but set a default value for iniital cordinates to ocntinue from when finding empty vars
-    global temp
+# vuild whole funnciton here but set a default value for iniital cordinates to ocntinue from when finding empty vars
+def solve(bo, draw, incorrect, valList, length, diff, row=0):
+    # pygame.event.pump()  # not necessary because for loop after it checks for every event
+    # allows us to leave game at any time
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+
     for i in range(row, len(bo)):
         for j in range(len(bo)):
             if bo[i][j] == 0:
                 for x in range(1, len(bo) + 1):
-                    temp += 1
                     if valid(bo, i, j, x):
+                        # turns current cell green
                         bo[i][j] = x
-                        if solve(bo, i):  # checks if updated board and row is solvable
-                            return True
+                        valList.append([i, j])
 
+                        # just comment this out to solve boards instantly
+                        if visuals and abs(len(valList) - length) > diff:
+                            draw()
+                            length = len(valList)
+
+                        try:
+                            incorrect.remove([i, j])
+                        except:
+                            pass
+
+                        # checks if updated board and is solvable
+                        if solve(bo, draw, incorrect, valList, length, i):
+                            return True
+                        incorrect.append(valList.pop())
                 # reset value if dead end - could also put in if cond. but doesnt matter because new x wont conflict w previous
                 bo[i][j] = 0
                 return False
-    show(bo)
-   # print(f"Process took {temp} steps and finished in {time.time() - start_time} seconds")
-    global more
+    return True  # if no empty cell found
+
+   # if you want the option of seeing more solutions
+"""    global more
     more = input('look for more? (Y for yes):')
     if more.lower() == 'y':
         print('searching ...')
-        return False
-    return True  # if no empty cells found
-    # input('more?')  # can be used if there is more than one solution
-
-
-"""# show(board1)
-start_time = time.time()
-show(board2)
-solve(board2)
-if(more.lower() == 'y'):
-    print('no more possible solutions')"""
+        return False 
+    return True  """

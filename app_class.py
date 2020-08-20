@@ -4,12 +4,15 @@ import requests  # gets html
 from bs4 import BeautifulSoup  # allows us to manipulate html
 from settings import *
 from buttonClass import *
-from solver import *
+from solver import solve, valid
+import time
+from datetime import timedelta
 
 
 class App:
     def __init__(self):
         pygame.init()
+        pygame.display.set_caption('sudoku')
         self.window = pygame.display.set_mode(
             (WIDTH, HEIGHT))  # creates display window
         self.running = True  # checks whether game is running
@@ -17,12 +20,10 @@ class App:
         self.mousePos = None  # mouse pos
         self.state = "playing"  # determines state of board
         self.cellChanged = False
-        self.finished = False
-        self.incorrectCells = []
-        self.playingButtons = []  # stores buttons for the play state
-        self.lockedCells = []
         self.font = pygame.font.SysFont('Arial', cellSize // 2)
-        self.getPuzzle("3")
+        # make ids to pull cells from sudoku solver
+        self.ids = [f'f{j // 9}{j % 9}' for j in range(81)]
+        self.getPuzzle("2")
 
     # runs game functions while its running
     def run(self):
@@ -44,7 +45,7 @@ class App:
             # User clicks
             if event.type == pygame.MOUSEBUTTONDOWN:
                 selected = self.mouseOnGrid()
-                if selected:
+                if selected and not self.finished:
                     self.selected = selected
                 else:
                     self.selected = None
@@ -67,10 +68,11 @@ class App:
         for button in self.playingButtons:
             button.update(self.mousePos)
 
-        if self.cellChanged:
+        if self.cellChanged and not self.finished:
             self.incorrectCells = []
+            self.validCells = []
+            # if all cells are done and there are no incorrect cells then puzzle is finished
             if self.allCellsDone():
-                self.finished = True
                 self.checkAllCells()
                 if not self.incorrectCells:
                     self.finished = True
@@ -82,16 +84,28 @@ class App:
         for button in self.playingButtons:
             button.draw(self.window)
 
+        self.shadeIncorrectCells(self.window, self.lockedCells)
+
+        self.shadeValidCells(self.window, self.lockedCells)
+
         if self.selected:
             # dont need window but good for redundancy
             self.drawSelection(self.window, self.selected)
 
         self.shadeLockedCells(self.window, self.lockedCells)
-        self.shadeIncorrectCells(self.window, self.lockedCells)
 
         self.drawNumbers(self.window)
 
         self.drawGrid(self.window)
+
+        # Used button class as a quick way to show finished
+        if self.finished:
+            finish = Button(131, 280, 340, 40, function=self.playing_events(), colour=(
+                255, 255, 255), text="Finished in " + str(self.banner) + ". Congrats!")
+            finish.draw(self.window)
+        else:
+            self.drawTimer(self.window)
+
         pygame.display.update()
 
         self.cellChanged = False
@@ -110,23 +124,20 @@ class App:
                 if [ridx, cidx] not in self.lockedCells and [ridx, cidx] not in self.incorrectCells:
                     if not valid(self.grid, ridx, cidx, num):
                         self.incorrectCells.append([ridx, cidx])
+                    elif [ridx, cidx] not in self.validCells:
+                        self.validCells.append([ridx, cidx])
 
 ##### HELPER FUNCTIONS #####
     def getPuzzle(self, difficulty):
+        self.finished = False
+        self.difficulty = int(difficulty)
         # difficulty must be passed in as string ("1"-"4")
+        self.startTime = time.time()
         html_doc = requests.get(
             f"https://nine.websudoku.com/?level={difficulty}").content
         soup = BeautifulSoup(html_doc, features="html.parser")
-        ids = ['f00', 'f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f10', 'f11',
-               'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f20', 'f21', 'f22', 'f23',
-               'f24', 'f25', 'f26', 'f27', 'f28', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35',
-               'f36', 'f37', 'f38', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47',
-               'f48', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f60',
-               'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f70', 'f71', 'f72',
-               'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f80', 'f81', 'f82', 'f83', 'f84',
-               'f85', 'f86', 'f87', 'f88']
         data = []
-        for cid in ids:
+        for cid in self.ids:
             data.append(soup.find('input', id=cid))
         board = [[0 for x in range(9)] for x in range(9)]
         for index, cell in enumerate(data):
@@ -135,7 +146,20 @@ class App:
             except:
                 pass
         self.grid = board
+        # creates a cop to pass on to solver
+        self.copy = [x[:]for x in self.grid]
         self.load()
+
+    def drawTimer(self, window):
+        font = pygame.font.SysFont("arial", 20, bold="1")
+        elapsed = time.time() - self.startTime
+        self.banner = str(timedelta(seconds=elapsed))[:-7]
+        text = font.render(
+            self.banner, False, (0, 0, 0))
+        width, height = text.get_size()
+        x = 450
+        y = 550
+        window.blit(text, (x, y))
 
     def drawSelection(self, window, pos):
         pygame.draw.rect(
@@ -144,6 +168,11 @@ class App:
     def shadeIncorrectCells(self, window, locked):
         for cell in self.incorrectCells:
             pygame.draw.rect(window, INCORRECTCELLCOLOUR, (
+                cell[1]*cellSize + gridPos[0], cell[0]*cellSize + gridPos[1], cellSize, cellSize))
+
+    def shadeValidCells(self, window, locked):
+        for cell in self.validCells:
+            pygame.draw.rect(window, VALIDCOLOUR, (
                 cell[1]*cellSize + gridPos[0], cell[0]*cellSize + gridPos[1], cellSize, cellSize))
 
     def shadeLockedCells(self, window, locked):
@@ -181,15 +210,26 @@ class App:
     # creates all buttons
     def loadButtons(self):
         self.playingButtons.append(Button(
-            20, 40, WIDTH//7, 40, function=self.checkAllCells, colour=(27, 142, 207), text="Check"))
+            40, 20, WIDTH//6, 40, function=self.getPuzzle, params="1",  colour=(117, 172, 112), text="Easy"))
         self.playingButtons.append(Button(
-            140, 40, WIDTH//7, 40, function=self.getPuzzle, params="1",  colour=(117, 172, 112), text="Easy"))
+            180, 20, WIDTH//6, 40, function=self.getPuzzle, params="2",  colour=(204, 197, 110), text="Medium"))
         self.playingButtons.append(Button(
-            260, 40, WIDTH//7, 40, function=self.getPuzzle, params="2",  colour=(204, 197, 110), text="Medium"))
+            320, 20, WIDTH//6, 40, function=self.getPuzzle, params="3",  colour=(199, 129, 48), text="Hard"))
         self.playingButtons.append(Button(
-            380, 40, WIDTH//7, 40, function=self.getPuzzle, params="3",  colour=(199, 129, 48), text="Hard"))
+            460, 20, WIDTH//6, 40, function=self.getPuzzle, params="4",  colour=(207, 68, 67), text="Evil"))
         self.playingButtons.append(Button(
-            500, 40, WIDTH//7, 40, function=self.getPuzzle, params="4",  colour=(207, 68, 67), text="Evil"))
+            180, 540, WIDTH//6, 40, function=self.checkAllCells, colour=(27, 142, 207), text="Check"))
+        self.playingButtons.append(Button(
+            320, 540, WIDTH//6, 40, function=self.solving, params=self.copy, colour=(27, 142, 207), text="Solve"))
+
+    def solving(self, copy):
+        self.grid = copy
+        self.incorrectCells = []
+        self.validCells = []
+        solve(self.grid, self.playing_draw,
+              self.incorrectCells, self.validCells, len(self.validCells), self.difficulty - 1)
+        self.cellChanged = True
+        self.playing_update()
 
     def textToScreen(self, window, text, pos, color=BLACK):
         font = self.font.render(text, False, color)
@@ -204,6 +244,8 @@ class App:
         self.loadButtons()
         self.lockedCells = []
         self.incorrectCells = []
+        self.validCells = []
+        self.banner = 0
         self.finshed = False
 
         # setting locked cells from original board
