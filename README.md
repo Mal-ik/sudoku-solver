@@ -20,7 +20,7 @@ The project shows a visualization of the backtracking algorithm solving a sudoku
 
 Clone the Github repo to a local directory and run the `main.py` file 
 
-**Note**: Can drastically increase solve speed by switching off animations. Do so by setting “visuals” in solver.py to False. 
+**Note**: Can drastically increase solve speed by switching off animations. Do so by setting “visuals” in `solver.py` to False. 
 
 
 ## Features
