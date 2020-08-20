@@ -35,12 +35,12 @@ Clone the Github repo to a local directory and run the `main.py` file
 - [Visual Studio Code](https://code.visualstudio.com/) - IDE
 - [Python 3.8.5](https://www.python.org/downloads/release/python-385/) - Programming language 
 - [Pygame](https://www.pygame.org/news) - Video game library 
-- [requests](https://pypi.org/project/requests/)/[BeautifulSoup](https://pypi.org/project/beautifulsoup4/) - Used to pull/ manipulate board data from website
+- [requests](https://pypi.org/project/requests/)/ BeautifulSoup](https://pypi.org/project/beautifulsoup4/) - Used to pull/ manipulate board data from website
 
 ## Acknowledgements
 
 Thanks to:
 - [Computerphile](https://www.youtube.com/watch?v=G_UYXzGuqvM) for introducing me to the algorithm
 - [A Plus Coding](https://www.youtube.com/playlist?list=PLryDJVmh-ww0J6BDQrdLtRyNOv4Lym_xo) for the base GUI
-- [Web Sudoku] (https://nine.websudoku.com/?) for the puzzles
+- [Web Sudoku](https://nine.websudoku.com/?) for the puzzles
 
