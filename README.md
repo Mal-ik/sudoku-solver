@@ -35,7 +35,7 @@ Clone the Github repo to a local directory and run the `main.py` file
 - [Visual Studio Code](https://code.visualstudio.com/) - IDE
 - [Python 3.8.5](https://www.python.org/downloads/release/python-385/) - Programming language 
 - [Pygame](https://www.pygame.org/news) - Video game library 
-- [requests](https://pypi.org/project/requests/)/ BeautifulSoup](https://pypi.org/project/beautifulsoup4/) - Used to pull/ manipulate board data from website
+- [requests](https://pypi.org/project/requests/)/ [BeautifulSoup](https://pypi.org/project/beautifulsoup4/) - Used to pull/ manipulate board data from website
 
 ## Acknowledgements
 
