@@ -16,6 +16,10 @@ The project shows a visualization of the backtracking algorithm solving a sudoku
 
 ## Demo
 
+<img src="gifs/difficulties.gif"/>
+<img src="gifs/checking.gif"/>
+<img src="gifs/solving.gif"/>
+
 ## How to Load Project
 
 Clone the Github repo to a local directory and run the `main.py` file 
