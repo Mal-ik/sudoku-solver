@@ -22,7 +22,9 @@ The project shows a visualization of the backtracking algorithm solving a sudoku
 
 ## How to Load Project
 
-Clone the Github repo to a local directory and run the `main.py` file 
+- Clone the Github repo to a local directory
+- Navigate to the directory and run `pip install -r requirements.txt`
+- Run `python3 main.py`  
 
 **Note**: Can drastically increase solve speed by switching off animations. Do so by setting “visuals” in `solver.py` to False. 
 
